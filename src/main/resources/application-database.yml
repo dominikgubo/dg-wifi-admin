@@ -1,0 +1,24 @@
+spring:
+  autoconfigure:
+    exclude: []
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/wifi}
+    username: ${DB_USERNAME:wifi}
+    password: ${DB_PASSWORD:wifi}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+database:
+  enabled: true
+
+platform:
+  sync:
+    cpe-ids: ${PLATFORM_SYNC_CPE_IDS:CPE_001,CPE_002,CPE_003}
+    max-cpes: ${PLATFORM_SYNC_MAX_CPES:3}
+    cron: ${PLATFORM_SYNC_CRON:0 0 2 * * *}
+    zone: ${PLATFORM_SYNC_ZONE:Europe/Zagreb}
+    sync-on-startup: ${PLATFORM_SYNC_ON_STARTUP:false}

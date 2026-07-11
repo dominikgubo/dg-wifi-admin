@@ -13,3 +13,18 @@ services:
       - ./mockoon/platform-mock.json:/data/platform-mock.json:ro
     ports:
       - "8080:3000"
+
+  postgres:
+    profiles: [database]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: wifi
+      POSTGRES_USER: wifi
+      POSTGRES_PASSWORD: wifi
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wifi -d wifi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
