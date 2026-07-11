@@ -24,6 +24,8 @@
         <mockwebserver.version>4.12.0</mockwebserver.version>
         <testcontainers.version>2.0.5</testcontainers.version>
         <jacoco.version>0.8.13</jacoco.version>
+        <checkstyle.version>3.6.0</checkstyle.version>
+        <pmd.version>3.27.0</pmd.version>
     </properties>
 
     <dependencies>
@@ -215,6 +217,83 @@
                                 <include>**/*IT.java</include>
                             </includes>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>quality</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>${checkstyle.version}</version>
+                        <configuration>
+                            <configLocation>${project.basedir}/config/checkstyle-unused.xml</configLocation>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
+                            <outputFileFormat>xml</outputFileFormat>
+                            <consoleOutput>true</consoleOutput>
+                            <failOnViolation>false</failOnViolation>
+                            <failsOnError>false</failsOnError>
+                            <linkXRef>false</linkXRef>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>checkstyle-report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>checkstyle</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>checkstyle-check</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <failOnViolation>true</failOnViolation>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <version>${pmd.version}</version>
+                        <configuration>
+                            <rulesets>
+                                <ruleset>${project.basedir}/config/pmd-unused.xml</ruleset>
+                            </rulesets>
+                            <includeTests>true</includeTests>
+                            <targetJdk>21</targetJdk>
+                            <format>xml</format>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <failOnViolation>false</failOnViolation>
+                            <printFailingErrors>true</printFailingErrors>
+                            <linkXRef>false</linkXRef>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>pmd-report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>pmd</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>pmd-check</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <failOnViolation>true</failOnViolation>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

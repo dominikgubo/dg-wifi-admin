@@ -176,4 +176,6 @@ The architecture and test details are documented in [docs/architecture.md](docs/
 
 The traditional package layout is organized around `controllers`, `services`, `clients`, `mappers`, `validators`, `models`, and `persistence`. PostgreSQL integration tests use Testcontainers and run with `mvn -Pintegration verify`; the default `mvn verify` suite remains Docker-independent. JaCoCo enforces 80% Java line coverage, with 85% as the project target. The backend pull-request workflow runs Java 21 compilation, tests, the coverage gate, and the Testcontainers profile, then uploads the HTML report. Repository branch protection must require that workflow before merging.
 
+Unused imports and local variables are checked separately with `mvn -Pquality verify`. The `Unused Java code` GitHub workflow publishes exact PR comments and annotations and fails when findings exist.
+
 Optional PostgreSQL synchronization, Actuator metrics, feature-gated bearer security, and the React frontend are documented in [docs/optional.md](docs/optional.md). They are disabled or isolated from the mandatory REST-to-SOAP flow by default.

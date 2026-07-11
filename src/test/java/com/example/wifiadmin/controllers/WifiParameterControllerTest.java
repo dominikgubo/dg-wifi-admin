@@ -13,7 +13,6 @@ import com.example.wifiadmin.models.domain.WifiBand;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
 import com.example.wifiadmin.exceptions.CpeNotFoundException;
 import com.example.wifiadmin.exceptions.PlatformCommunicationException;
-import com.example.wifiadmin.services.platform.WifiPlatformClient;
 import com.example.wifiadmin.services.wifi.WifiService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -36,6 +36,16 @@ The first command runs the Docker-independent suite and the JaCoCo gate. The sec
 
 JaCoCo writes the report to `target/site/jacoco` and fails `verify` below 80% Java line coverage. The current quality target is 85%. Generated CXF classes and the trivial Spring Boot launcher are excluded; application, controller, mapper, validator, persistence, scheduler, and security code remain included.
 
+## Unused imports and variables
+
+The quality profile checks handwritten production and test Java sources with Checkstyle and PMD:
+
+```bash
+mvn -Pquality verify
+```
+
+Checkstyle detects unused imports. PMD detects unused local variables and unused assignments. The separate `Unused Java code` GitHub workflow converts the reports into exact pull request review comments and GitHub annotations, then fails when any finding exists. Generated CXF sources are outside the analyzed source roots.
+
 ## Local smoke test
 
 Start the platform mock:
