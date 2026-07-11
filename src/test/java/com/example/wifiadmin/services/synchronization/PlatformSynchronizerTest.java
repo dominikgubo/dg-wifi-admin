@@ -8,7 +8,7 @@ import com.example.wifiadmin.configuration.SyncProperties;
 import com.example.wifiadmin.models.domain.EncryptionType;
 import com.example.wifiadmin.models.domain.WifiBand;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
-import com.example.wifiadmin.exception.CpeNotFoundException;
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
 import com.example.wifiadmin.persistence.stores.WifiConfigurationStore;
 import com.example.wifiadmin.services.platform.WifiPlatformClient;
 import java.util.List;
