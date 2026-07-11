@@ -1,6 +1,6 @@
 package com.example.wifiadmin.configuration;
 
-import com.example.wifiadmin.application.PlatformSynchronizer;
+import com.example.wifiadmin.services.synchronization.PlatformSynchronizer;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
