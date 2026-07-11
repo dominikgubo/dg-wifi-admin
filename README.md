@@ -138,3 +138,42 @@ curl -s -X POST "http://localhost:8080/platform" \
 | [wsdl/wifi-platform.wsdl](wsdl/wifi-platform.wsdl) | WSDL platforme (SOAP 1.1, document/literal) |
 | [mockoon/platform-mock.json](mockoon/platform-mock.json) | Mockoon okruženje (generirano skriptom) |
 | [docker-compose.yml](docker-compose.yml) | Mockoon CLI kontejner |
+
+## Implemented backend
+
+The backend is a Java 21 Spring Boot application built with Maven. It exposes the REST contract on port 8081 and uses an Apache CXF client generated from the supplied WSDL.
+
+The implementation is organized into REST API, application, domain, SOAP platform, configuration, and exception layers. Handwritten code does not construct SOAP XML or log SOAP bodies. CXF-generated sources are created in `target/generated-sources/cxf` during the build and are not committed.
+
+### Run locally
+
+Prerequisites:
+
+- Java 21
+- Maven
+- Docker, for the supplied platform mock
+
+```bash
+docker compose up -d
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+The REST service is available at `http://localhost:8081`.
+
+```bash
+curl http://localhost:8081/wifi-parameter/CPE_001
+```
+
+Run the complete test suite with:
+
+```bash
+mvn clean verify
+```
+
+Configuration can be overridden with `SERVER_PORT`, `PLATFORM_URL`, `PLATFORM_CONNECT_TIMEOUT`, and `PLATFORM_READ_TIMEOUT` environment variables.
+
+The architecture and test details are documented in [docs/architecture.md](docs/architecture.md), [docs/testing.md](docs/testing.md), and the [code tour](docs/code-tour.md).
+
+The traditional package layout is organized around `controllers`, `services`, `clients`, `mappers`, `validators`, `models`, and `persistence`. PostgreSQL integration tests use Testcontainers and run with `mvn -Pintegration verify`; the default `mvn verify` suite remains Docker-independent. JaCoCo enforces 80% Java line coverage, with 85% as the project target. The backend pull-request workflow runs Java 21 compilation, tests, the coverage gate, and the Testcontainers profile, then uploads the HTML report. Repository branch protection must require that workflow before merging.
+
+Optional PostgreSQL synchronization, Actuator metrics, feature-gated bearer security, and the React frontend are documented in [docs/optional.md](docs/optional.md). They are disabled or isolated from the mandatory REST-to-SOAP flow by default.
