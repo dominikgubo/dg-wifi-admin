@@ -1,5 +1,8 @@
-node_modules/
-package-lock.json
-.env
+target/
+.idea/
+*.iml
+.vscode/
 *.log
-scripts/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
