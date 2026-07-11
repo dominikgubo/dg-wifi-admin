@@ -1,6 +1,6 @@
 package com.example.wifiadmin.persistence.stores;
 
-import com.example.wifiadmin.exception.MirrorUnavailableException;
+import com.example.wifiadmin.exceptions.MirrorUnavailableException;
 import com.example.wifiadmin.mappers.persistence.WifiConfigurationEntityMapper;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
 import com.example.wifiadmin.persistence.entities.WifiConfigurationEntity;

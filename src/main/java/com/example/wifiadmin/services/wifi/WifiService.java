@@ -1,6 +1,6 @@
 package com.example.wifiadmin.services.wifi;
 
-import com.example.wifiadmin.exception.CpeNotFoundException;
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
 import com.example.wifiadmin.persistence.stores.WifiConfigurationStore;
 import com.example.wifiadmin.services.platform.WifiPlatformClient;

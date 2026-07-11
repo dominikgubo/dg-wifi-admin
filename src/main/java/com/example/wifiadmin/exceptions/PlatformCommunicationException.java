@@ -1,4 +1,4 @@
-package com.example.wifiadmin.exception;
+package com.example.wifiadmin.exceptions;
 
 public class PlatformCommunicationException extends RuntimeException {
 

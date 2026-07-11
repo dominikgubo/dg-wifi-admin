@@ -1,8 +1,8 @@
 package com.example.wifiadmin.controllers;
 
-import com.example.wifiadmin.exception.CpeNotFoundException;
-import com.example.wifiadmin.exception.MirrorUnavailableException;
-import com.example.wifiadmin.exception.PlatformCommunicationException;
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
+import com.example.wifiadmin.exceptions.MirrorUnavailableException;
+import com.example.wifiadmin.exceptions.PlatformCommunicationException;
 import com.example.wifiadmin.models.api.ErrorBody;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;

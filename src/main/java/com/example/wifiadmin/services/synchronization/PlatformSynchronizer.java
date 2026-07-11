@@ -1,8 +1,8 @@
 package com.example.wifiadmin.services.synchronization;
 
 import com.example.wifiadmin.configuration.SyncProperties;
-import com.example.wifiadmin.exception.CpeNotFoundException;
-import com.example.wifiadmin.exception.PlatformCommunicationException;
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
+import com.example.wifiadmin.exceptions.PlatformCommunicationException;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
 import com.example.wifiadmin.persistence.stores.WifiConfigurationStore;
 import com.example.wifiadmin.services.platform.WifiPlatformClient;

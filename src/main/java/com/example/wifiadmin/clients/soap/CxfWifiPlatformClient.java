@@ -2,8 +2,8 @@ package com.example.wifiadmin.clients.soap;
 
 import com.example.wifiadmin.mappers.soap.SoapWifiConfigurationMapper;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
-import com.example.wifiadmin.exception.CpeNotFoundException;
-import com.example.wifiadmin.exception.PlatformCommunicationException;
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
+import com.example.wifiadmin.exceptions.PlatformCommunicationException;
 import com.example.wifiadmin.platform.soap.generated.GetCpeIdRequest;
 import com.example.wifiadmin.platform.soap.generated.GetCpeIdResponse;
 import com.example.wifiadmin.platform.soap.generated.UpdateCpeIdRequest;
