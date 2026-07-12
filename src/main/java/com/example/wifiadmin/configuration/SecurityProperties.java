@@ -7,5 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record SecurityProperties(
         boolean enabled,
         String issuerUri,
+        String audience,
         List<String> allowedOrigins) {
 }

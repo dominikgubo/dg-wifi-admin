@@ -1,0 +1,101 @@
+{
+  "realm": "wifi-admin",
+  "enabled": true,
+  "displayName": "WiFi Admin Local",
+  "sslRequired": "NONE",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "wifi-read-client",
+      "name": "WiFi Admin Read Client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "defaultClientScopes": [
+        "wifi:read",
+        "wifi-audience"
+      ]
+    },
+    {
+      "clientId": "wifi-write-client",
+      "name": "WiFi Admin Write Client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "defaultClientScopes": [
+        "wifi:write",
+        "wifi-audience"
+      ]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "wifi:read",
+      "description": "WiFi Admin read permission",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
+      "name": "wifi:write",
+      "description": "WiFi Admin write permission",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
+      "name": "wifi-audience",
+      "description": "WiFi Admin API audience",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "wifi-admin-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "wifi-admin-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "test-user",
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "test-user@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test-password",
+          "temporary": false
+        }
+      ],
+      "requiredActions": [],
+      "realmRoles": []
+    }
+  ]
+}

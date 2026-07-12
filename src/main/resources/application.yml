@@ -28,6 +28,7 @@ database:
 security:
   enabled: false
   issuer-uri: ${SECURITY_ISSUER_URI:}
+  audience: ${SECURITY_AUDIENCE:}
   allowed-origins: ${SECURITY_ALLOWED_ORIGINS:}
 
 management:

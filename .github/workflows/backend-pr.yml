@@ -1,4 +1,4 @@
-name: Backend PR
+name: Backend build and code coverage
 
 on:
   pull_request:

@@ -8,8 +8,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimValidator;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -60,6 +65,21 @@ public class SecurityConfiguration {
         if (properties.issuerUri() == null || properties.issuerUri().isBlank()) {
             throw new IllegalStateException("security.issuer-uri is required when security is enabled");
         }
-        return JwtDecoders.fromIssuerLocation(properties.issuerUri());
+        if (properties.audience() == null || properties.audience().isBlank()) {
+            throw new IllegalStateException("security.audience is required when security is enabled");
+        }
+
+        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromIssuerLocation(properties.issuerUri());
+        jwtDecoder.setJwtValidator(jwtValidator(properties));
+        return jwtDecoder;
+    }
+
+    OAuth2TokenValidator<Jwt> jwtValidator(SecurityProperties properties) {
+        OAuth2TokenValidator<Jwt> audienceValidator = new JwtClaimValidator<List<String>>(
+                "aud",
+                audiences -> audiences != null && audiences.contains(properties.audience()));
+        return JwtValidators.createDefaultWithValidators(
+                JwtValidators.createDefaultWithIssuer(properties.issuerUri()),
+                audienceValidator);
     }
 }
