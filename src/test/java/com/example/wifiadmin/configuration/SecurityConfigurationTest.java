@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.cors.CorsConfiguration;
@@ -29,6 +30,28 @@ class SecurityConfigurationTest {
         assertThat(cors.getAllowedOrigins())
                 .containsExactly("http://localhost:3000", "http://localhost:3001");
         assertThat(cors.getAllowedMethods()).containsExactly("GET", "PUT", "OPTIONS");
+        assertThat(cors.getAllowCredentials()).isFalse();
+        assertThat(cors.checkOrigin("http://localhost:3000")).isEqualTo("http://localhost:3000");
+        assertThat(cors.checkOrigin("https://admin.example.com")).isNull();
+    }
+
+    @Test
+    void corsConfigurationAllowsPutPreflightHeadersForConfiguredOrigin() {
+        SecurityProperties properties = new SecurityProperties(
+                false,
+                "",
+                "",
+                List.of("https://admin.example.com"));
+
+        CorsConfiguration cors = configuration.corsConfigurationSource(properties)
+                .getCorsConfiguration(new MockHttpServletRequest("OPTIONS", "/wifi-parameter"));
+
+        assertThat(cors).isNotNull();
+        assertThat(cors.checkOrigin("https://admin.example.com"))
+                .isEqualTo("https://admin.example.com");
+        assertThat(cors.checkHttpMethod(HttpMethod.PUT)).contains(HttpMethod.PUT);
+        assertThat(cors.checkHeaders(List.of("Content-Type"))).contains("Content-Type");
+        assertThat(cors.checkOrigin("https://untrusted.example.com")).isNull();
     }
 
     @Test
