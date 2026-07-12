@@ -1,10 +1,28 @@
 import type { ErrorBody, WifiConfiguration } from './types'
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? ''
+const apiTokenStorageKey = 'wifi-admin-api-token'
+
+export function getApiToken() {
+  return window.localStorage.getItem(apiTokenStorageKey) ?? ''
+}
+
+export function setApiToken(token: string) {
+  const normalizedToken = token.trim()
+  if (normalizedToken) {
+    window.localStorage.setItem(apiTokenStorageKey, normalizedToken)
+  } else {
+    window.localStorage.removeItem(apiTokenStorageKey)
+  }
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getApiToken()
   const response = await fetch(`${baseUrl}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
     ...options
   })
 

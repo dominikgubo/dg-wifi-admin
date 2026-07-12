@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getWifiConfiguration, updateWifiConfiguration } from './api'
+import { getApiToken, getWifiConfiguration, setApiToken, updateWifiConfiguration } from './api'
 import type { EncryptionType, WifiBand, WifiConfiguration } from './types'
 
 const encryptionTypes: EncryptionType[] = [
@@ -36,6 +36,8 @@ export default function App() {
   const [configuration, setConfiguration] = useState(emptyConfiguration)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [apiToken, setApiTokenInput] = useState(getApiToken())
+  const authEnabled = import.meta.env.VITE_AUTH_ENABLED === 'true'
 
   function update<K extends keyof WifiConfiguration>(key: K, value: WifiConfiguration[K]) {
     setConfiguration((current) => ({ ...current, [key]: value }))
@@ -82,6 +84,29 @@ export default function App() {
         <p className="eyebrow">MojTelekom</p>
         <h1>WiFi configuration</h1>
         <p className="intro">Read and update a router configuration through the REST adapter.</p>
+
+        {authEnabled && (
+          <div className="auth-box">
+            <label>
+              Bearer token
+              <input
+                type="password"
+                value={apiToken}
+                onChange={(event) => setApiTokenInput(event.target.value)}
+                placeholder="Paste a Keycloak access token"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setApiToken(apiToken)
+                setMessage(apiToken.trim() ? 'Token stored.' : 'Stored token cleared.')
+              }}
+            >
+              Use token
+            </button>
+          </div>
+        )}
 
         <label>
           CPE ID

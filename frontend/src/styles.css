@@ -47,6 +47,14 @@ h1 {
   line-height: 1.5;
 }
 
+.auth-box {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid #dbe2ec;
+  border-radius: .75rem;
+  background: #f8fafc;
+}
+
 label {
   display: grid;
   gap: .4rem;
