@@ -48,16 +48,10 @@ Checkstyle detects unused imports. PMD detects unused local variables and unused
 
 ## Local smoke test
 
-Start the platform mock:
+Start the complete no-authorization stack:
 
 ```bash
-docker compose up -d
-```
-
-Run the backend:
-
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=local
+docker compose --profile no-auth up -d --build
 ```
 
 Run the test suite:

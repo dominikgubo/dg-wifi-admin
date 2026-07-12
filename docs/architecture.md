@@ -10,6 +10,10 @@ The REST client uses `cpeId` to identify the customer-premises router. The SOAP 
 
 ## Request flow
 
+The flow below is used by the `database` profile, which is the standard
+containerized runtime. In the default and `local` profiles the database mirror
+is absent, so GET calls the SOAP platform directly through `WifiPlatformClient`.
+
 ```text
 REST client
     |
@@ -20,6 +24,12 @@ WifiParameterController
     v
 WifiService
     |
+    | GET
+    v
+PostgreSQL mirror
+
+Synchronization and PUT
+    |
     v
 WifiPlatformClient
     |
@@ -28,7 +38,7 @@ WifiPlatformClient
 External WiFi platform
 ```
 
-The controller owns HTTP and validation concerns. The application service owns the use case. The SOAP adapter owns generated SOAP types, namespaces, endpoint configuration, and fault translation.
+The controller owns HTTP and validation concerns. The application service owns the use case. With the database profile, GET reads from the database mirror; synchronization and PUT use the SOAP adapter. Without that profile, GET also uses the SOAP adapter, which owns generated SOAP types, namespaces, endpoint configuration, and fault translation.
 
 ## SOAP contract
 
@@ -50,8 +60,9 @@ Missing encryption defaults to `OPEN`. A secure encryption type requires a nonbl
 | Situation | HTTP status | Code |
 |---|---:|---|
 | Invalid request or business validation failure | 400 | `VALIDATION_ERROR` |
-| Platform reports an unknown CPE | 404 | `CPE_NOT_FOUND` |
+| CPE is absent from the database mirror, or the platform rejects a PUT as unknown | 404 | `CPE_NOT_FOUND` |
 | Timeout, connection failure, malformed response, or other SOAP fault | 502 | `PLATFORM_ERROR` |
+| Database mirror unavailable | 503 | `MIRROR_UNAVAILABLE` |
 
 SOAP faults are classified by their fault code or fault text because the mock platform can return a not-found SOAP fault with HTTP 500.
 
