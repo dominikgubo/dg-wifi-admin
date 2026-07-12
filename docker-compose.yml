@@ -1,7 +1,62 @@
+x-backend-environment: &backend-environment
+  SPRING_PROFILES_ACTIVE: database
+  SERVER_PORT: "8081"
+  PLATFORM_URL: http://platform-mock:3000/platform
+  DB_URL: jdbc:postgresql://postgres:5432/wifi
+  DB_USERNAME: wifi
+  DB_PASSWORD: wifi
+  PLATFORM_SYNC_ON_STARTUP: "true"
+  PLATFORM_SYNC_CPE_IDS: CPE_001,CPE_002,CPE_003,CPE_004
+  PLATFORM_SYNC_MAX_CPES: "4"
+  SECURITY_AUDIENCE: wifi-admin-api
+  SECURITY_ALLOWED_ORIGINS: "http://localhost:${HOST_FRONTEND_PORT:-5173},http://127.0.0.1:${HOST_FRONTEND_PORT:-5173}"
+
+x-backend-dependencies: &backend-dependencies
+  platform-mock:
+    condition: service_healthy
+  postgres:
+    condition: service_healthy
+
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: on-failure
+  expose:
+    - "8081"
+  environment:
+    <<: *backend-environment
+  depends_on:
+    <<: *backend-dependencies
+  healthcheck:
+    test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8081/actuator/health/readiness"]
+    interval: 5s
+    timeout: 5s
+    retries: 20
+    start_period: 20s
+
+x-frontend-build: &frontend-build
+  context: ./frontend
+  dockerfile: Dockerfile
+  args:
+    VITE_API_BASE_URL: "http://localhost:${HOST_BACKEND_PORT:-8081}"
+
+x-frontend: &frontend
+  build:
+    <<: *frontend-build
+  restart: unless-stopped
+  expose:
+    - "80"
+  healthcheck:
+    test: ["CMD", "wget", "--quiet", "--spider", "http://localhost/"]
+    interval: 5s
+    timeout: 5s
+    retries: 12
+
 services:
   platform-mock:
+    profiles: [no-auth, auth]
     image: mockoon/cli:9.2.0
-    container_name: platform-mock
     command:
       - --data
       - /data/platform-mock.json
@@ -12,4 +67,118 @@ services:
     volumes:
       - ./mockoon/platform-mock.json:/data/platform-mock.json:ro
     ports:
-      - "8080:3000"
+      - "${HOST_PLATFORM_PORT:-8080}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          const net=require('net'); const socket=net.createConnection(3000,'127.0.0.1');
+          socket.on('connect',()=>{socket.end();process.exit(0)});
+          socket.on('error',()=>process.exit(1));
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  postgres:
+    profiles: [no-auth, auth]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: wifi
+      POSTGRES_USER: wifi
+      POSTGRES_PASSWORD: wifi
+    ports:
+      - "${HOST_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wifi -d wifi"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  keycloak:
+    profiles: [auth]
+    image: quay.io/keycloak/keycloak:26.7.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      # Keep the token issuer resolvable from the backend container. The
+      # mapped localhost:8090 port remains available to the host for token calls.
+      KC_HOSTNAME: http://keycloak:8080
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./keycloak/wifi-admin-realm.json:/opt/keycloak/data/import/wifi-admin-realm.json:ro
+    ports:
+      - "${HOST_KEYCLOAK_PORT:-8090}:8080"
+    restart: unless-stopped
+    healthcheck:
+      # The Keycloak image has bash but not curl; this checks its management
+      # port after Keycloak has finished booting and importing the realm.
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9000'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  backend-no-auth:
+    <<: *backend
+    profiles: [no-auth]
+    ports:
+      - "${HOST_BACKEND_PORT:-8081}:8081"
+    environment:
+      <<: *backend-environment
+      SECURITY_ENABLED: "false"
+
+  backend-auth:
+    <<: *backend
+    profiles: [auth]
+    ports:
+      - "${HOST_BACKEND_PORT:-8081}:8081"
+    environment:
+      <<: *backend-environment
+      SECURITY_ENABLED: "true"
+      SECURITY_ISSUER_URI: http://keycloak:8080/realms/wifi-admin
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      <<: *backend-dependencies
+      keycloak:
+        condition: service_healthy
+
+  frontend-no-auth:
+    <<: *frontend
+    profiles: [no-auth]
+    build:
+      <<: *frontend-build
+      args:
+        VITE_API_BASE_URL: "http://localhost:${HOST_BACKEND_PORT:-8081}"
+        VITE_AUTH_ENABLED: "false"
+    ports:
+      - "${HOST_FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend-no-auth:
+        condition: service_healthy
+
+  frontend-auth:
+    <<: *frontend
+    profiles: [auth]
+    build:
+      <<: *frontend-build
+      args:
+        VITE_API_BASE_URL: "http://localhost:${HOST_BACKEND_PORT:-8081}"
+        VITE_AUTH_ENABLED: "true"
+    ports:
+      - "${HOST_FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend-auth:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

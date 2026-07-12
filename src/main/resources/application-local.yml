@@ -1,0 +1,6 @@
+platform:
+  url: ${PLATFORM_URL:http://localhost:8080/platform}
+
+logging:
+  level:
+    com.example.wifiadmin: DEBUG
