@@ -1,6 +1,7 @@
 package com.example.wifiadmin.controllers;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -50,6 +51,52 @@ class WifiParameterControllerTest {
     }
 
     @Test
+    void getPassesArbitraryNonBlankCpeIdToService() throws Exception {
+        String cpeId = "router-with-a-nonstandard-id";
+        WifiConfiguration configuration = new WifiConfiguration(
+                cpeId,
+                WifiBand.BAND_2_4_GHZ,
+                "Office",
+                EncryptionType.WPA2_PSK,
+                "secret");
+        when(wifiService.getConfiguration(cpeId)).thenReturn(configuration);
+
+        mockMvc.perform(get("/wifi-parameter/{cpeId}", cpeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cpeId").value(cpeId));
+
+        verify(wifiService).getConfiguration(cpeId);
+    }
+
+    @Test
+    void putAcceptsValidSecureConfiguration() throws Exception {
+        WifiConfiguration updated = new WifiConfiguration(
+                "CPE_004",
+                WifiBand.BAND_5_GHZ,
+                "Guest-5G-Updated",
+                EncryptionType.WPA3_SAE,
+                "test-password-004");
+        when(wifiService.updateConfiguration(updated)).thenReturn(updated);
+
+        mockMvc.perform(put("/wifi-parameter")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "cpeId":"CPE_004",
+                                  "wifiBand":"BAND_5_GHZ",
+                                  "ssid":"Guest-5G-Updated",
+                                  "encryptionType":"WPA3_SAE",
+                                  "password":"test-password-004"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cpeId").value("CPE_004"))
+                .andExpect(jsonPath("$.ssid").value("Guest-5G-Updated"));
+
+        verify(wifiService).updateConfiguration(updated);
+    }
+
+    @Test
     void putRejectsPasswordlessSecureConfiguration() throws Exception {
         mockMvc.perform(put("/wifi-parameter")
                         .contentType("application/json")
@@ -59,6 +106,32 @@ class WifiParameterControllerTest {
                                   "wifiBand":"BAND_2_4_GHZ",
                                   "ssid":"Office",
                                   "encryptionType":"WPA2_PSK"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void putRejectsMalformedJson() throws Exception {
+        mockMvc.perform(put("/wifi-parameter")
+                        .contentType("application/json")
+                        .content("{not-json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void putRejectsUnknownEncryptionType() throws Exception {
+        mockMvc.perform(put("/wifi-parameter")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "cpeId":"CPE_004",
+                                  "wifiBand":"BAND_5_GHZ",
+                                  "ssid":"Guest-5G-Updated",
+                                  "encryptionType":"NOT_AN_ENCRYPTION_TYPE",
+                                  "password":"test-password-004"
                                 }
                                 """))
                 .andExpect(status().isBadRequest())

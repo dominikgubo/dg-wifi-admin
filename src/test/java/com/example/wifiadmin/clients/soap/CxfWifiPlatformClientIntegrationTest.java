@@ -66,7 +66,7 @@ class CxfWifiPlatformClientIntegrationTest {
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "text/xml; charset=utf-8")
-                .setBody(updateResponse()));
+                .setBody("\n" + updateResponse()));
 
         WifiPlatformClient client = client();
         WifiConfiguration configuration = client.updateConfiguration(new WifiConfiguration(

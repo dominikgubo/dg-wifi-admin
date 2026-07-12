@@ -1,10 +1,13 @@
 package com.example.wifiadmin.services.wifi;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
 import com.example.wifiadmin.models.domain.EncryptionType;
 import com.example.wifiadmin.models.domain.WifiBand;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
@@ -49,6 +52,25 @@ class WifiServiceTest {
         when(store.findByCpeId(configuration.cpeId())).thenReturn(Optional.of(configuration));
 
         assertThat(service.getConfiguration(configuration.cpeId())).isEqualTo(configuration);
+
+        verifyNoInteractions(platformClient);
+    }
+
+    @Test
+    void getReturnsNotFoundWithoutCallingPlatformOnMirrorMiss() {
+        WifiPlatformClient platformClient = mock(WifiPlatformClient.class);
+        WifiConfigurationStore store = mock(WifiConfigurationStore.class);
+        ObjectProvider<WifiConfigurationStore> storeProvider = mock(ObjectProvider.class);
+        WifiService service = new WifiService(platformClient, storeProvider);
+        String cpeId = "router-with-a-nonstandard-id";
+
+        when(storeProvider.getIfAvailable()).thenReturn(store);
+        when(store.findByCpeId(cpeId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getConfiguration(cpeId))
+                .isInstanceOf(CpeNotFoundException.class);
+
+        verifyNoInteractions(platformClient);
     }
 
     private WifiConfiguration configuration(String ssid) {

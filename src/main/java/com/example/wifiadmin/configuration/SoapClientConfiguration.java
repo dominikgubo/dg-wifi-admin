@@ -1,5 +1,6 @@
 package com.example.wifiadmin.configuration;
 
+import com.example.wifiadmin.clients.soap.interceptors.LeadingWhitespaceXmlInterceptor;
 import com.example.wifiadmin.platform.soap.generated.WifiPlatformPortType;
 import com.example.wifiadmin.platform.soap.generated.WifiPlatformService;
 import jakarta.xml.ws.BindingProvider;
@@ -30,6 +31,7 @@ public class SoapClientConfiguration {
                 .getDataBinding();
         dataBinding.setNamespaceMap(Map.of(
                 "http://wifi-admin.local/platform/v1", "tns"));
+        client.getInInterceptors().add(new LeadingWhitespaceXmlInterceptor());
 
         HTTPConduit conduit = (HTTPConduit) client.getConduit();
         HTTPClientPolicy policy = new HTTPClientPolicy();
