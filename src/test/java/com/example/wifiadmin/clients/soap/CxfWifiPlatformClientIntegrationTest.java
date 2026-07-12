@@ -55,6 +55,8 @@ class CxfWifiPlatformClientIntegrationTest {
         assertThat(request.getHeader("SOAPAction")).contains("#getCpeID");
         assertThat(request.getBody().readUtf8())
                 .contains("GetCpeIdRequest")
+                .contains("tns:GetCpeIdRequest")
+                .contains("tns:cpeId")
                 .contains("cpeId")
                 .contains("CPE_001");
     }
@@ -80,6 +82,10 @@ class CxfWifiPlatformClientIntegrationTest {
         assertThat(request.getHeader("SOAPAction")).contains("#updateCpeId");
         assertThat(request.getBody().readUtf8())
                 .contains("UpdateCpeIdRequest")
+                .contains("tns:UpdateCpeIdRequest")
+                .contains("tns:configuration")
+                .contains("tns:cpeId")
+                .contains("tns:ssid")
                 .contains("Office-5G-New")
                 .contains("new-secret");
     }
