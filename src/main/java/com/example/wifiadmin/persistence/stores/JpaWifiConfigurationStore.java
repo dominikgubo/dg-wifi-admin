@@ -3,13 +3,13 @@ package com.example.wifiadmin.persistence.stores;
 import com.example.wifiadmin.exceptions.MirrorUnavailableException;
 import com.example.wifiadmin.mappers.persistence.WifiConfigurationEntityMapper;
 import com.example.wifiadmin.models.domain.WifiConfiguration;
-import com.example.wifiadmin.persistence.entities.WifiConfigurationEntity;
 import com.example.wifiadmin.persistence.repositories.WifiConfigurationRepository;
-import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Component
 @ConditionalOnProperty(name = "database.enabled", havingValue = "true")
