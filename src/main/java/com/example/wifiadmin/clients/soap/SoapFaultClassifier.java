@@ -1,5 +1,6 @@
 package com.example.wifiadmin.clients.soap;
 
+import jakarta.xml.soap.SOAPFault;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import java.util.Locale;
 
@@ -9,9 +10,15 @@ public class SoapFaultClassifier {
         Throwable current = throwable;
         while (current != null) {
             if (current instanceof SOAPFaultException faultException) {
-                String faultCode = faultException.getFault().getFaultCode();
-                String faultString = faultException.getFault().getFaultString();
-                return containsNotFound(faultCode) || containsNotFound(faultString);
+                SOAPFault fault = faultException.getFault();
+                if (fault != null
+                        && (containsNotFound(fault.getFaultCode())
+                        || containsNotFound(fault.getFaultString()))) {
+                    return true;
+                }
+            }
+            if (containsNotFound(current.getMessage())) {
+                return true;
             }
             current = current.getCause();
         }
@@ -19,6 +26,9 @@ public class SoapFaultClassifier {
     }
 
     private boolean containsNotFound(String value) {
-        return value != null && value.toLowerCase(Locale.ROOT).replaceAll("\\s+", "").contains("notfound");
+        return value != null
+                && value.toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]", "")
+                .contains("notfound");
     }
 }

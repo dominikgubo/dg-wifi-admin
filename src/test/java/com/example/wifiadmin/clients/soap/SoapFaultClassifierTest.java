@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import jakarta.xml.soap.SOAPFault;
+import jakarta.xml.ws.WebServiceException;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import org.junit.jupiter.api.Test;
 
@@ -27,5 +28,13 @@ class SoapFaultClassifierTest {
         when(fault.getFaultString()).thenReturn("Platform unavailable");
 
         assertThat(classifier.isCpeNotFound(new SOAPFaultException(fault))).isFalse();
+    }
+
+    @Test
+    void identifiesNotFoundMessageInWrappedPlatformException() {
+        WebServiceException exception = new WebServiceException(
+                "CPE_NOT_FOUND: platform rejected the request");
+
+        assertThat(classifier.isCpeNotFound(exception)).isTrue();
     }
 }

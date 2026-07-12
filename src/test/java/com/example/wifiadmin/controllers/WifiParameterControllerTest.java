@@ -1,5 +1,6 @@
 package com.example.wifiadmin.controllers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -145,6 +146,30 @@ class WifiParameterControllerTest {
 
         mockMvc.perform(get("/wifi-parameter/CPE_UNKNOWN"))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("No WiFi parameter for the given CPE ID: CPE_UNKNOWN"))
+                .andExpect(jsonPath("$.code").value("CPE_NOT_FOUND"));
+    }
+
+    @Test
+    void putMapsUnknownCpeToNotFound() throws Exception {
+        when(wifiService.updateConfiguration(any()))
+                .thenThrow(new CpeNotFoundException("CPE_UNKNOWN"));
+
+        mockMvc.perform(put("/wifi-parameter")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "cpeId":"CPE_UNKNOWN",
+                                  "wifiBand":"BAND_5_GHZ",
+                                  "ssid":"Guest-5G",
+                                  "encryptionType":"WPA3_SAE",
+                                  "password":"secret"
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("No WiFi parameter for the given CPE ID: CPE_UNKNOWN"))
                 .andExpect(jsonPath("$.code").value("CPE_NOT_FOUND"));
     }
 

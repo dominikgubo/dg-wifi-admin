@@ -1,9 +1,11 @@
 package com.example.wifiadmin.clients.soap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.wifiadmin.configuration.PlatformProperties;
 import com.example.wifiadmin.configuration.SoapClientConfiguration;
+import com.example.wifiadmin.exceptions.CpeNotFoundException;
 import com.example.wifiadmin.mappers.soap.SoapWifiConfigurationMapper;
 import com.example.wifiadmin.models.domain.EncryptionType;
 import com.example.wifiadmin.models.domain.WifiBand;
@@ -90,6 +92,25 @@ class CxfWifiPlatformClientIntegrationTest {
                 .contains("new-secret");
     }
 
+    @Test
+    void mapsUnknownCpeFaultDuringUpdateToNotFound() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "text/xml; charset=utf-8")
+                .setBody(notFoundResponse()));
+
+        WifiPlatformClient client = client();
+
+        assertThatThrownBy(() -> client.updateConfiguration(
+                        new WifiConfiguration(
+                                "CPE_UNKNOWN",
+                                WifiBand.BAND_5_GHZ,
+                                "Guest-5G",
+                                EncryptionType.WPA3_SAE,
+                                "secret")))
+                .isInstanceOf(CpeNotFoundException.class);
+    }
+
     private WifiPlatformClient client() {
         PlatformProperties properties = new PlatformProperties(
                 server.url("/platform").toString(),
@@ -133,6 +154,20 @@ class CxfWifiPlatformClientIntegrationTest {
                         <tns:password>new-secret</tns:password>
                       </tns:configuration>
                     </tns:UpdateCpeIdResponse>
+                  </soap:Body>
+                </soap:Envelope>
+                """;
+    }
+
+    private String notFoundResponse() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                  <soap:Body>
+                    <soap:Fault>
+                      <faultcode>NotFound</faultcode>
+                      <faultstring>CPE not found for update</faultstring>
+                    </soap:Fault>
                   </soap:Body>
                 </soap:Envelope>
                 """;

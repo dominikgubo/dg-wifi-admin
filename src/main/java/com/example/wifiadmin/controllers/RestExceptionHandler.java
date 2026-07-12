@@ -23,7 +23,9 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(CpeNotFoundException.class)
     public ResponseEntity<ErrorBody> handleNotFound(CpeNotFoundException exception) {
-        return response(HttpStatus.NOT_FOUND, "CPE was not found", "CPE_NOT_FOUND");
+        return response(HttpStatus.NOT_FOUND,
+                "No WiFi parameter for the given CPE ID: " + exception.getCpeId(),
+                "CPE_NOT_FOUND");
     }
 
     @ExceptionHandler(PlatformCommunicationException.class)
